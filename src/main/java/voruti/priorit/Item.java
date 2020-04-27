@@ -1,6 +1,8 @@
 package voruti.priorit;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -15,7 +17,7 @@ public class Item implements Cloneable, Comparable<Item> {
 	private String uName;
 	private String title;
 	private String text;
-	private String category;
+	private List<String> categories;
 	private Date etaDate;
 	private Priority priority;
 	private boolean done;
@@ -23,7 +25,8 @@ public class Item implements Cloneable, Comparable<Item> {
 	public Item() {
 		this.title = "";
 		this.text = "";
-		this.category = "none";
+		this.categories = new ArrayList<>();
+		this.categories.add("none");
 		long timestamp = System.currentTimeMillis() + 2592000000L; // 30 days
 		this.etaDate = new Date(timestamp);
 		this.uName = timestamp + "_" + (int) (Math.random() * 899 + 100);
@@ -74,17 +77,17 @@ public class Item implements Cloneable, Comparable<Item> {
 	}
 
 	/**
-	 * @return the category
+	 * @return the categories
 	 */
-	public String getCategory() {
-		return category;
+	public List<String> getCategories() {
+		return categories;
 	}
 
 	/**
-	 * @param category the category to set
+	 * @param categories the categories to set
 	 */
-	public void setCategory(String category) {
-		this.category = category;
+	public void setCategories(List<String> categories) {
+		this.categories = categories;
 	}
 
 	/**
@@ -147,7 +150,7 @@ public class Item implements Cloneable, Comparable<Item> {
 	public Item copy() {
 		Item item = new Item();
 		item.uName = this.uName;
-		item.category = this.category;
+		item.categories = new ArrayList<>(this.categories);
 		item.etaDate = (Date) this.etaDate.clone();
 		item.priority = this.priority;
 		item.text = this.text;
@@ -159,8 +162,11 @@ public class Item implements Cloneable, Comparable<Item> {
 
 	@Override
 	public String toString() {
-		return String.format("Item [uName=%s, title=%s, text=%s, category=%s, etaDate=%s, priority=%s, done=%s]", uName,
-				title, text, category, etaDate, priority, done);
+		final int maxLen = 5;
+		return String.format("Item [uName=%s, title=%s, text=%s, categories=%s, etaDate=%s, priority=%s, done=%s]",
+				uName, title, text,
+				categories != null ? categories.subList(0, Math.min(categories.size(), maxLen)) : null, etaDate,
+				priority, done);
 	}
 
 	@Override

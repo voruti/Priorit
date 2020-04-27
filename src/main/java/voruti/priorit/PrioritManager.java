@@ -26,7 +26,7 @@ public class PrioritManager {
 
 	private static final String CLASS_NAME = PrioritManager.class.getName();
 	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
-	private static final String ITEM_FILE_ENDING = ".itm";
+	private static final String ITEM_FILE_ENDING = ".xml";
 
 	private static XStream xstream = null;
 
@@ -160,8 +160,11 @@ public class PrioritManager {
 								.matches(text)
 						|| item.getuName()
 								.matches(text)
-						|| item.getCategory()
-								.matches(text))
+						|| !item.getCategories()
+								.stream()
+								.filter(c -> c.matches(text))
+								.collect(Collectors.toList())
+								.isEmpty())
 				.map(Item::copy)
 				.collect(Collectors.toList());
 
@@ -283,7 +286,6 @@ public class PrioritManager {
 										.append(System.lineSeparator());
 							}
 
-//							Item item = Item.fromXml(fileInput.toString());
 							Item item = (Item) xstream.fromXML(fileInput.toString());
 							if (item != null) {
 								items.add(item);
