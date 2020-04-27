@@ -8,7 +8,8 @@
 	<artifactId>priorit</artifactId>
 	<version>1.0-SNAPSHOT</version>
 
-	<name>priorit</name>
+	<name>Priorit</name>
+	<url>https://github.com/voruti/Priorit</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
