@@ -1,6 +1,7 @@
 package voruti.priorit;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author voruti
@@ -14,7 +15,7 @@ public class Item implements Cloneable, Comparable<Item> {
 	private String uName;
 	private String title;
 	private String text;
-	private Category category;
+	private String category;
 	private Date etaDate;
 	private Priority priority;
 	private boolean done;
@@ -22,7 +23,7 @@ public class Item implements Cloneable, Comparable<Item> {
 	public Item() {
 		this.title = "";
 		this.text = "";
-		this.category = new Category();
+		this.category = "none";
 		long timestamp = System.currentTimeMillis() + 2592000000L; // 30 days
 		this.etaDate = new Date(timestamp);
 		this.uName = timestamp + "_" + (int) (Math.random() * 899 + 100);
@@ -41,7 +42,7 @@ public class Item implements Cloneable, Comparable<Item> {
 	 * @param uName the uName to set
 	 */
 	public void setuName(String uName) {
-		this.uName = uName;
+		this.uName = uName.toLowerCase();
 	}
 
 	/**
@@ -75,14 +76,14 @@ public class Item implements Cloneable, Comparable<Item> {
 	/**
 	 * @return the category
 	 */
-	public Category getCategory() {
+	public String getCategory() {
 		return category;
 	}
 
 	/**
 	 * @param category the category to set
 	 */
-	public void setCategory(Category category) {
+	public void setCategory(String category) {
 		this.category = category;
 	}
 
@@ -130,12 +131,7 @@ public class Item implements Cloneable, Comparable<Item> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((uName == null) ? 0
-				: uName.toLowerCase()
-						.hashCode());
-		return result;
+		return Objects.hash(uName);
 	}
 
 	@Override
@@ -145,18 +141,13 @@ public class Item implements Cloneable, Comparable<Item> {
 		if (!(obj instanceof Item))
 			return false;
 		Item other = (Item) obj;
-		if (uName == null) {
-			if (other.uName != null)
-				return false;
-		} else if (!uName.equalsIgnoreCase(other.uName))
-			return false;
-		return true;
+		return Objects.equals(uName, other.uName);
 	}
 
 	public Item copy() {
 		Item item = new Item();
 		item.uName = this.uName;
-		item.category = this.category.copy();
+		item.category = this.category;
 		item.etaDate = (Date) this.etaDate.clone();
 		item.priority = this.priority;
 		item.text = this.text;
@@ -174,6 +165,9 @@ public class Item implements Cloneable, Comparable<Item> {
 
 	@Override
 	public int compareTo(Item i) {
+		if (this.equals(i))
+			return 0;
+
 		return this.etaDate.compareTo(i.etaDate);
 	}
 }
