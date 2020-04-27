@@ -6,7 +6,7 @@ import java.util.Date;
  * @author voruti
  *
  */
-public class Item implements Cloneable {
+public class Item implements Cloneable, Comparable<Item> {
 
 	/**
 	 * unique name
@@ -17,6 +17,18 @@ public class Item implements Cloneable {
 	private Category category;
 	private Date etaDate;
 	private Priority priority;
+	private boolean done;
+
+	public Item() {
+		this.title = "";
+		this.text = "";
+		this.category = new Category();
+		long timestamp = System.currentTimeMillis() + 2592000000L; // 30 days
+		this.etaDate = new Date(timestamp);
+		this.uName = timestamp + "_" + (int) (Math.random() * 899 + 100);
+		this.priority = Priority.VERY_LOW;
+		this.done = false;
+	}
 
 	/**
 	 * @return the uName
@@ -102,6 +114,20 @@ public class Item implements Cloneable {
 		this.priority = priority;
 	}
 
+	/**
+	 * @return the done
+	 */
+	public boolean isDone() {
+		return done;
+	}
+
+	/**
+	 * @param done the done to set
+	 */
+	public void setDone(boolean done) {
+		this.done = done;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -129,19 +155,25 @@ public class Item implements Cloneable {
 
 	public Item copy() {
 		Item item = new Item();
+		item.uName = this.uName;
 		item.category = this.category.copy();
 		item.etaDate = (Date) this.etaDate.clone();
 		item.priority = this.priority;
 		item.text = this.text;
 		item.title = this.title;
-		item.uName = this.uName;
+		item.done = this.done;
 
 		return item;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("Item [uName=%s, title=%s, text=%s, category=%s, etaDate=%s, priority=%s]", uName, title,
-				text, category, etaDate, priority);
+		return String.format("Item [uName=%s, title=%s, text=%s, category=%s, etaDate=%s, priority=%s, done=%s]", uName,
+				title, text, category, etaDate, priority, done);
+	}
+
+	@Override
+	public int compareTo(Item i) {
+		return this.etaDate.compareTo(i.etaDate);
 	}
 }

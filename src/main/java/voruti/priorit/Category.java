@@ -8,8 +8,8 @@ public class Category {
 
 	private String name;
 
-	public Category(String name) {
-		this.name = name;
+	public Category() {
+		this.name = "none";
 	}
 
 	/**
@@ -17,6 +17,13 @@ public class Category {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * @param name the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override
@@ -45,7 +52,9 @@ public class Category {
 	}
 
 	public Category copy() {
-		return new Category(this.name);
+		Category category = new Category();
+		category.name = this.name;
+		return category;
 	}
 
 	@Override
