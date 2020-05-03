@@ -198,18 +198,22 @@ public class PrioritManager {
 	 * {@link #addItem(Item) added/saved} if it was not before.
 	 * 
 	 * @param item the {@link Item} to update or add
+	 * @return {@code true}, if the update or adding was successful, {@code false}
+	 *         otherwise
 	 */
-	public void updateItem(Item item) {
+	public boolean updateItem(Item item) {
 		final String METHOD_NAME = "updateItem";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, item);
 
 		LOGGER.log(Level.FINE, "Adding new item");
-		if (addItem(item, true))
+		boolean successful = addItem(item, true);
+		if (successful)
 			LOGGER.log(Level.FINE, "Successfully updated item={0}", item);
 		else
 			LOGGER.log(Level.WARNING, "Error on updating item={0}", item);
 
-		LOGGER.exiting(CLASS_NAME, METHOD_NAME);
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME, successful);
+		return successful;
 	}
 
 	/**
