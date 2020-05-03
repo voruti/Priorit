@@ -1,9 +1,12 @@
 package voruti.priorit;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeSet;
 
 /**
  * @author voruti
@@ -17,7 +20,7 @@ public class Item implements Cloneable, Comparable<Item> {
 	private String uName;
 	private String title;
 	private String text;
-	private List<String> categories;
+	private TreeSet<String> categories;
 	private Date etaDate;
 	private Priority priority;
 	private boolean done;
@@ -25,7 +28,7 @@ public class Item implements Cloneable, Comparable<Item> {
 	public Item() {
 		this.title = "";
 		this.text = "";
-		this.categories = new ArrayList<>();
+		this.categories = new TreeSet<>();
 		this.categories.add("none");
 		long timestamp = System.currentTimeMillis() + 2592000000L; // 30 days
 		this.etaDate = new Date(timestamp);
@@ -80,14 +83,14 @@ public class Item implements Cloneable, Comparable<Item> {
 	 * @return the categories
 	 */
 	public List<String> getCategories() {
-		return categories;
+		return new ArrayList<>(categories);
 	}
 
 	/**
 	 * @param categories the categories to set
 	 */
 	public void setCategories(List<String> categories) {
-		this.categories = categories;
+		this.categories = new TreeSet<>(categories);
 	}
 
 	/**
@@ -150,7 +153,7 @@ public class Item implements Cloneable, Comparable<Item> {
 	public Item copy() {
 		Item item = new Item();
 		item.uName = this.uName;
-		item.categories = new ArrayList<>(this.categories);
+		item.categories = new TreeSet<>(this.categories);
 		item.etaDate = (Date) this.etaDate.clone();
 		item.priority = this.priority;
 		item.text = this.text;
@@ -164,9 +167,21 @@ public class Item implements Cloneable, Comparable<Item> {
 	public String toString() {
 		final int maxLen = 5;
 		return String.format("Item [uName=%s, title=%s, text=%s, categories=%s, etaDate=%s, priority=%s, done=%s]",
-				uName, title, text,
-				categories != null ? categories.subList(0, Math.min(categories.size(), maxLen)) : null, etaDate,
-				priority, done);
+				uName, title, text.replace(System.lineSeparator(), "\\n"),
+				categories != null ? toString(categories, maxLen) : null, etaDate, priority, done);
+	}
+
+	private String toString(Collection<?> collection, int maxLen) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("[");
+		int i = 0;
+		for (Iterator<?> iterator = collection.iterator(); iterator.hasNext() && i < maxLen; i++) {
+			if (i > 0)
+				builder.append(", ");
+			builder.append(iterator.next());
+		}
+		builder.append("]");
+		return builder.toString();
 	}
 
 	@Override
