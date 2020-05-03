@@ -11,6 +11,7 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -75,6 +76,8 @@ public class PrioritManager {
 	 */
 	public File getDirectory() {
 		final String METHOD_NAME = "getDirectory";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME);
+
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME, directory);
 		return directory;
 	}
@@ -114,6 +117,7 @@ public class PrioritManager {
 	 */
 	public List<Item> getItems() {
 		final String METHOD_NAME = "getItems";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME);
 
 		List<Item> items = this.items.stream()
 				.map(Item::copy)
@@ -129,6 +133,7 @@ public class PrioritManager {
 	 */
 	public Item getNextItem() {
 		final String METHOD_NAME = "getNextItem";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME);
 
 		Item item;
 		if (!items.isEmpty()) {
@@ -185,8 +190,13 @@ public class PrioritManager {
 		final String METHOD_NAME = "updateItem";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, item);
 
-		items.remove(item);
-		addItem(item);
+		LOGGER.log(Level.FINE, "Removing old item from list");
+		if (items.remove(item)) {
+			LOGGER.log(Level.FINE, "Adding new item again");
+			addItem(item);
+		} else {
+			LOGGER.log(Level.WARNING, "Can not remove old item from list (newItem={0})", item);
+		}
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME);
 	}
@@ -287,11 +297,11 @@ public class PrioritManager {
 							}
 
 							Item item = (Item) xstream.fromXML(fileInput.toString());
-							if (item != null) {
-								items.add(item);
+							if (item != null && items.add(item)) {
 								LOGGER.log(Level.FINE, "Loaded item={0} from file", item);
 							} else {
-								LOGGER.log(Level.WARNING, "Converting fileInput={0} to XML returns item={1}",
+								LOGGER.log(Level.WARNING,
+										"Can not load item! Converting fileInput={0} to XML returns item={1}",
 										new Object[] { fileInput, item });
 								return true;
 							}
@@ -339,5 +349,11 @@ public class PrioritManager {
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME, successful);
 		return successful;
+	}
+
+	public static void iLog() {
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+		consoleHandler.setLevel(Level.ALL);
+		LOGGER.addHandler(consoleHandler);
 	}
 }

@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -160,6 +162,9 @@ public class Item implements Comparable<Item> {
 	}
 
 	public Item copy() {
+		final String METHOD_NAME = "copy";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME);
+
 		Item item = new Item();
 		item.uName = this.uName;
 		item.categories = new TreeSet<>(this.categories);
@@ -169,6 +174,7 @@ public class Item implements Comparable<Item> {
 		item.title = this.title;
 		item.done = this.done;
 
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME, item);
 		return item;
 	}
 
@@ -193,11 +199,37 @@ public class Item implements Comparable<Item> {
 		return builder.toString();
 	}
 
+	/**
+	 * Note to self: This is used as equals-check (sometimes?).
+	 */
 	@Override
 	public int compareTo(Item i) {
-		if (this.equals(i))
-			return 0;
+		final String METHOD_NAME = "compareTo";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME, i);
 
-		return this.etaDate.compareTo(i.etaDate);
+		LOGGER.log(Level.FINEST, "Comparing these items:" + System.lineSeparator() + "{0}" + System.lineSeparator() + "{1}",
+				new Object[] { this, i });
+
+		int compareResult;
+
+		if (this.equals(i)) {
+			compareResult = 0;
+		} else {
+			int dateCompare = this.etaDate.compareTo(i.etaDate);
+			if (dateCompare != 0)
+				compareResult = dateCompare;
+
+			else
+				compareResult = this.uName.compareTo(i.uName);
+		}
+
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME, compareResult);
+		return compareResult;
+	}
+
+	public static void iLog() {
+		ConsoleHandler consoleHandler = new ConsoleHandler();
+		consoleHandler.setLevel(Level.ALL);
+		LOGGER.addHandler(consoleHandler);
 	}
 }
