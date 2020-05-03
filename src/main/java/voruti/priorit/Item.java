@@ -7,12 +7,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
+import java.util.logging.Logger;
 
 /**
  * @author voruti
  *
  */
-public class Item implements Cloneable, Comparable<Item> {
+public class Item implements Comparable<Item> {
+
+	private static final String CLASS_NAME = Item.class.getName();
+	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
 
 	/**
 	 * unique name
@@ -26,6 +30,9 @@ public class Item implements Cloneable, Comparable<Item> {
 	private boolean done;
 
 	public Item() {
+		final String METHOD_NAME = "<init>";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME);
+
 		this.title = "";
 		this.text = "";
 		this.categories = new TreeSet<>();
@@ -35,6 +42,8 @@ public class Item implements Cloneable, Comparable<Item> {
 		this.uName = timestamp + "_" + (int) (Math.random() * 899 + 100);
 		this.priority = Priority.VERY_LOW;
 		this.done = false;
+
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME);
 	}
 
 	/**
@@ -167,8 +176,8 @@ public class Item implements Cloneable, Comparable<Item> {
 	public String toString() {
 		final int maxLen = 5;
 		return String.format("Item [uName=%s, title=%s, text=%s, categories=%s, etaDate=%s, priority=%s, done=%s]",
-				uName, title, text.replace("\n", "\\n"),
-				categories != null ? toString(categories, maxLen) : null, etaDate, priority, done);
+				uName, title, text.replace("\n", "\\n"), categories != null ? toString(categories, maxLen) : null,
+				etaDate, priority, done);
 	}
 
 	private String toString(Collection<?> collection, int maxLen) {
