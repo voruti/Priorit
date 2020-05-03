@@ -207,18 +207,22 @@ public class Item implements Comparable<Item> {
 		final String METHOD_NAME = "compareTo";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, i);
 
-		LOGGER.log(Level.FINEST, "Comparing these items:" + System.lineSeparator() + "{0}" + System.lineSeparator() + "{1}",
+		LOGGER.log(Level.FINEST,
+				"Comparing these items:" + System.lineSeparator() + "{0}" + System.lineSeparator() + "{1}",
 				new Object[] { this, i });
 
 		int compareResult;
 
 		if (this.equals(i)) {
 			compareResult = 0;
+		} else if (this.done && !i.done) {
+			compareResult = 1;
+		} else if (!this.done && i.done) {
+			compareResult = -1;
 		} else {
 			int dateCompare = this.etaDate.compareTo(i.etaDate);
 			if (dateCompare != 0)
 				compareResult = dateCompare;
-
 			else
 				compareResult = this.uName.compareTo(i.uName);
 		}
