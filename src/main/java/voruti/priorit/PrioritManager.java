@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeSet;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,7 +35,6 @@ public class PrioritManager {
 	 * A directory to save all data in.
 	 */
 	private File directory;
-	private TreeSet<Item> items;
 
 	/**
 	 * Creates a new manager and saves all data in {@code directory}.
@@ -49,24 +48,26 @@ public class PrioritManager {
 		final String METHOD_NAME = "<init>";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, directory);
 
+		// create directory:
 		try {
 			directory.mkdirs();
 		} catch (SecurityException e) {
 			throw new IOException(String.format("File directory=%s could not be created", directory));
 		}
+		// test if directory:
 		if (!directory.isDirectory())
 			throw new IOException(String.format("File directory=%s is no directory", directory));
 
 		this.directory = directory;
 
+		// init XStream:
 		if (xstream == null) {
 			xstream = new XStream();
 			xstream.alias("item", Item.class);
 		}
 
-		this.items = new TreeSet<>();
-		if (!loadFromFile())
-			throw new IOException(String.format("Error on loading items from directory=%s", directory));
+		// checking/validating files:
+		loadFromFile();
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME);
 	}
@@ -90,19 +91,28 @@ public class PrioritManager {
 	 *         {@code false} otherwise
 	 */
 	public boolean addItem(Item item) {
+		return addItem(item, false);
+	}
+
+	/**
+	 * Saves/Adds an {@link Item} to the priority list.
+	 * 
+	 * @param item                 the {@link Item} to add
+	 * @param ignoreAlreadyPresent {@code true}, to overwrite already present item
+	 *                             files
+	 * @return {@code true}, if the {@link Item} was successfully saved;
+	 *         {@code false} otherwise
+	 */
+	public boolean addItem(Item item, boolean ignoreAlreadyPresent) {
 		final String METHOD_NAME = "addItem";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, item);
 
 		boolean successful = false;
 
-		if (items.add(item.copy())) {
-			LOGGER.log(Level.INFO, "Successfully added item={0} to list", item);
+		if (ignoreAlreadyPresent || !getFileToItem(item).exists()) {
 			successful = saveToFile(item);
-			if (!successful) {
-				LOGGER.log(Level.WARNING, "Error at saving item={0} to file; reverting addition of item to list...",
-						item);
-				items.remove(item);
-			}
+			if (!successful)
+				LOGGER.log(Level.WARNING, "Error at saving item={0} to file", item);
 		} else {
 			LOGGER.log(Level.WARNING, "item={0} is already in list", item);
 		}
@@ -113,15 +123,20 @@ public class PrioritManager {
 
 	/**
 	 * @return all saved {@link Item items}; sorted by priority (most important
-	 *         {@link Item} first)
+	 *         {@link Item} first); is empty if item can not be loaded
 	 */
-	public List<Item> getItems() {
+	public List<Item> getAllItems() {
 		final String METHOD_NAME = "getItems";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME);
 
-		List<Item> items = this.items.stream()
-				.map(Item::copy)
-				.collect(Collectors.toList());
+		List<Item> items = new ArrayList<>();
+		try {
+			items = loadFromFile();
+			LOGGER.log(Level.FINE, "Successfully obtained all items from the files");
+		} catch (IOException e) {
+			LOGGER.log(Level.WARNING, "Item list can not be obtained");
+			e.printStackTrace();
+		}
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME, items);
 		return items;
@@ -135,20 +150,20 @@ public class PrioritManager {
 		final String METHOD_NAME = "getNextItem";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME);
 
+		List<Item> items = getAllItems();
+
 		Item item;
-		if (!items.isEmpty()) {
-			item = items.first()
-					.copy();
-		} else {
+		if (!items.isEmpty())
+			item = items.get(0);
+		else
 			item = null;
-		}
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME, item);
 		return item;
 	}
 
 	/**
-	 * Search {@link Item items} by {@code text} in uName, title and text.
+	 * Search {@link Item items} by {@code text} in uName, title, text and category.
 	 * 
 	 * @param text the keyword or regEx to search for
 	 * @return the wanted {@link Item items} as {@link List}; if no {@link Item} is
@@ -158,7 +173,7 @@ public class PrioritManager {
 		final String METHOD_NAME = "searchItem(String)";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, text);
 
-		List<Item> foundItems = items.stream()
+		List<Item> foundItems = getAllItems().stream()
 				.filter(item -> item.getTitle()
 						.matches(text)
 						|| item.getText()
@@ -180,9 +195,7 @@ public class PrioritManager {
 	/**
 	 * Updates already present {@link Item} (identified by uName) with the new
 	 * information from {@link Item item}. The {@link Item item} will be
-	 * {@link #addItem(Item) added/saved} if it was not before.<br>
-	 * ! Warning: The item first gets removed, then added again. If the addition of
-	 * the item fails, the item effectively is deleted (TODO fix this) !
+	 * {@link #addItem(Item) added/saved} if it was not before.
 	 * 
 	 * @param item the {@link Item} to update or add
 	 */
@@ -190,13 +203,11 @@ public class PrioritManager {
 		final String METHOD_NAME = "updateItem";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, item);
 
-		LOGGER.log(Level.FINE, "Removing old item from list");
-		if (items.remove(item)) {
-			LOGGER.log(Level.FINE, "Adding new item again");
-			addItem(item);
-		} else {
-			LOGGER.log(Level.WARNING, "Can not remove old item from list (newItem={0})", item);
-		}
+		LOGGER.log(Level.FINE, "Adding new item");
+		if (addItem(item, true))
+			LOGGER.log(Level.FINE, "Successfully updated item={0}", item);
+		else
+			LOGGER.log(Level.WARNING, "Error on updating item={0}", item);
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME);
 	}
@@ -229,8 +240,7 @@ public class PrioritManager {
 			FileOutputStream fileOutputStream = null;
 			PrintWriter printWriter = null;
 			try {
-				fileOutputStream = new FileOutputStream(
-						directory.getPath() + File.separator + item.getuName() + ITEM_FILE_ENDING);
+				fileOutputStream = new FileOutputStream(getFileToItem(item));
 				printWriter = new PrintWriter(fileOutputStream);
 				printWriter.println(fileOutput); // here the item is written to disk
 				printWriter.flush();
@@ -263,92 +273,108 @@ public class PrioritManager {
 	}
 
 	/**
-	 * Loads {@link Item items} from all files in {@link #directory} into
-	 * {@link #items}.
+	 * Loads {@link Item items} from all files in {@link #directory} and returns
+	 * them as sorted {@link List}.
 	 * 
-	 * @return if all {@link Item items} were loaded successfully
+	 * @return all {@link Item items} sorted in a {@link List}; the {@link List} is
+	 *         empty, if no items are found
+	 * @throws IOException if one occurs while searching and opening the item files
+	 *                     or not all files are successfully loaded
 	 * 
 	 * @see #ITEM_FILE_ENDING
 	 */
-	private boolean loadFromFile() {
+	private List<Item> loadFromFile() throws IOException {
 		final String METHOD_NAME = "loadFromFile";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME);
 
 		boolean successful = false;
 
-		try {
-			successful = Files.walk(directory.toPath())
-					.filter(p -> p.toString()
-							.endsWith(ITEM_FILE_ENDING))
-					.filter(path -> { // contains only failed paths afterwards
-						FileInputStream fileInputStream = null;
-						InputStreamReader inputStreamReader = null;
-						BufferedReader bufferedReader = null;
-						try {
-							fileInputStream = new FileInputStream(path.toFile());
-							inputStreamReader = new InputStreamReader(fileInputStream);
-							bufferedReader = new BufferedReader(inputStreamReader);
+		final List<Item> items = new ArrayList<>();
 
-							StringBuilder fileInput = new StringBuilder();
-							String line;
-							while ((line = bufferedReader.readLine()) != null) {
-								fileInput.append(line)
-										.append(System.lineSeparator());
-							}
+		successful = Files.walk(directory.toPath())
+				.filter(p -> p.toString()
+						.endsWith(ITEM_FILE_ENDING))
+				.filter(path -> { // contains only failed paths afterwards
+					FileInputStream fileInputStream = null;
+					InputStreamReader inputStreamReader = null;
+					BufferedReader bufferedReader = null;
+					try {
+						fileInputStream = new FileInputStream(path.toFile());
+						inputStreamReader = new InputStreamReader(fileInputStream);
+						bufferedReader = new BufferedReader(inputStreamReader);
 
-							Item item = (Item) xstream.fromXML(fileInput.toString());
-							if (item != null && items.add(item)) {
-								LOGGER.log(Level.FINE, "Loaded item={0} from file", item);
-							} else {
-								LOGGER.log(Level.WARNING,
-										"Can not load item! Converting fileInput={0} to XML returns item={1}",
-										new Object[] { fileInput, item });
+						StringBuilder fileInput = new StringBuilder();
+						String line;
+						while ((line = bufferedReader.readLine()) != null) {
+							fileInput.append(line)
+									.append(System.lineSeparator());
+						}
+
+						Item item = (Item) xstream.fromXML(fileInput.toString());
+						if (item != null && items.add(item)) {
+							LOGGER.log(Level.FINE, "Loaded item={0} from file", item);
+						} else {
+							LOGGER.log(Level.WARNING,
+									"Can not load item! Converting fileInput={0} to XML returns item={1}",
+									new Object[] { fileInput, item });
+							return true;
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+						return true;
+					} catch (XStreamException e) {
+						LOGGER.log(Level.WARNING, "Converting fileInput to XML failed (path={0})", path);
+						e.printStackTrace();
+						return true;
+					} finally {
+						if (bufferedReader != null)
+							try {
+								bufferedReader.close();
+							} catch (IOException e) {
+								e.printStackTrace();
 								return true;
 							}
-						} catch (IOException e) {
-							e.printStackTrace();
-							return true;
-						} catch (XStreamException e) {
-							LOGGER.log(Level.WARNING, "Converting fileInput to XML failed (path={0})", path);
-							e.printStackTrace();
-							return true;
-						} finally {
-							if (bufferedReader != null)
-								try {
-									bufferedReader.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-									return true;
-								}
-							if (inputStreamReader != null)
-								try {
-									inputStreamReader.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-									return true;
-								}
-							if (fileInputStream != null)
-								try {
-									fileInputStream.close();
-								} catch (IOException e) {
-									e.printStackTrace();
-									return true;
-								}
-						}
-						return false;
-					})
-					.collect(Collectors.toList())
-					.isEmpty();
-		} catch (IOException e) {
-			e.printStackTrace();
-			successful = false;
-		}
+						if (inputStreamReader != null)
+							try {
+								inputStreamReader.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+								return true;
+							}
+						if (fileInputStream != null)
+							try {
+								fileInputStream.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+								return true;
+							}
+					}
+					return false;
+				})
+				.collect(Collectors.toList())
+				.isEmpty();
 
 		if (successful)
-			LOGGER.log(Level.INFO, "Successfully loaded all items from directory={0}", directory);
+			LOGGER.log(Level.FINE, "Successfully loaded all items from directory={0}", directory);
+		else
+			throw new IOException(String.format("Error on loading items from directory=%s", directory));
 
-		LOGGER.exiting(CLASS_NAME, METHOD_NAME, successful);
-		return successful;
+		items.sort(null);
+
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME, items);
+		return items;
+	}
+
+	/**
+	 * Generates a {@link File} in which the {@link Item item} is saved.
+	 * 
+	 * @param item the {@link Item} to generate a {@link File} for
+	 * @return the generated {@link File}
+	 * 
+	 * @see #ITEM_FILE_ENDING
+	 */
+	private File getFileToItem(Item item) {
+		return new File(directory.getPath() + File.separator + item.getuName() + ITEM_FILE_ENDING);
 	}
 
 	public static void iLog() {
