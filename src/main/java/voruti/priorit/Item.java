@@ -167,7 +167,7 @@ public class Item implements Cloneable, Comparable<Item> {
 	public String toString() {
 		final int maxLen = 5;
 		return String.format("Item [uName=%s, title=%s, text=%s, categories=%s, etaDate=%s, priority=%s, done=%s]",
-				uName, title, text.replace(System.lineSeparator(), "\\n"),
+				uName, title, text.replace("\n", "\\n"),
 				categories != null ? toString(categories, maxLen) : null, etaDate, priority, done);
 	}
 
