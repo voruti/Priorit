@@ -63,6 +63,11 @@ public class PrioritManager {
 		// init XStream:
 		if (xstream == null) {
 			xstream = new XStream();
+			
+			// from https://stackoverflow.com/a/45152845 :
+			XStream.setupDefaultSecurity(xstream); // to be removed after 1.5
+			xstream.allowTypesByWildcard(new String[] { "voruti.priorit.**" });
+
 			xstream.alias("item", Item.class);
 		}
 
