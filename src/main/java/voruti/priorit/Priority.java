@@ -10,6 +10,11 @@ public enum Priority {
 
 	private final int value;
 
+	/**
+	 * Initialize the value.
+	 * 
+	 * @param value
+	 */
 	Priority(int value) {
 		this.value = value;
 	}
