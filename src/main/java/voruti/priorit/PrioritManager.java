@@ -388,4 +388,21 @@ public class PrioritManager {
 		return file;
 	}
 
+	/**
+	 * @return all categories which are used in any {@link Item items}
+	 */
+	public List<String> getAllCategories() {
+		final String METHOD_NAME = "getFileToItem";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME);
+
+		List<String> categories = getAllItems().stream()
+				.map(i -> i.getCategories())
+				.flatMap(cl -> cl.stream())
+				.distinct()
+				.collect(Collectors.toList());
+
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME, categories);
+		return categories;
+	}
+
 }
