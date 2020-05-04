@@ -10,13 +10,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Object to store information of (list) items.
+ * 
  * @author voruti
- *
  */
 public class Item implements Comparable<Item> {
 
@@ -34,6 +34,10 @@ public class Item implements Comparable<Item> {
 	private Priority priority;
 	private boolean done;
 
+	/**
+	 * Initializes default item with empty or predefined values. The {@link #uName}
+	 * is the current time stamp and a random number.
+	 */
 	public Item() {
 		final String METHOD_NAME = "<init>";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME);
@@ -164,6 +168,11 @@ public class Item implements Comparable<Item> {
 		return Objects.equals(uName, other.uName);
 	}
 
+	/**
+	 * Own version of {@code clone()} method. Deep copy.
+	 * 
+	 * @return a deep copy of the {@link Item}
+	 */
 	public Item copy() {
 		final String METHOD_NAME = "copy";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME);
@@ -240,6 +249,12 @@ public class Item implements Comparable<Item> {
 		return compareResult;
 	}
 
+	/**
+	 * Calculates the "value"/"worth" of {@link Item item}.
+	 * 
+	 * @param item the {@link Item} to calculate the value for
+	 * @return the value
+	 */
 	public static int calculateValue(Item item) {
 		final String METHOD_NAME = "calculateValue";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, item);
@@ -250,11 +265,17 @@ public class Item implements Comparable<Item> {
 		return value;
 	}
 
+	/**
+	 * Calculates the days left to {@link Date date}.
+	 * 
+	 * @param date the {@link Date} to count days to
+	 * @return the number of days until {@link Date date}
+	 */
 	public static int daysLeft(Date date) {
 		final String METHOD_NAME = "daysLeft";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, date);
 
-		int daysBetween = (int) ChronoUnit.DAYS.between(LocalDate.now(),date.toInstant()
+		int daysBetween = (int) ChronoUnit.DAYS.between(LocalDate.now(), date.toInstant()
 				.atZone(ZoneId.systemDefault())
 				.toLocalDate());
 
@@ -262,9 +283,4 @@ public class Item implements Comparable<Item> {
 		return daysBetween;
 	}
 
-	public static void iLog() {
-		ConsoleHandler consoleHandler = new ConsoleHandler();
-		consoleHandler.setLevel(Level.ALL);
-		LOGGER.addHandler(consoleHandler);
-	}
 }

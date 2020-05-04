@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -27,6 +26,7 @@ public class PrioritManager {
 
 	private static final String CLASS_NAME = PrioritManager.class.getName();
 	private static final Logger LOGGER = Logger.getLogger(CLASS_NAME);
+
 	private static final String ITEM_FILE_ENDING = ".xml";
 
 	private static XStream xstream = null;
@@ -63,7 +63,7 @@ public class PrioritManager {
 		// init XStream:
 		if (xstream == null) {
 			xstream = new XStream();
-			
+
 			// from https://stackoverflow.com/a/45152845 :
 			XStream.setupDefaultSecurity(xstream); // to be removed after 1.5
 			xstream.allowTypesByWildcard(new String[] { "voruti.priorit.**" });
@@ -81,10 +81,6 @@ public class PrioritManager {
 	 * @return the directory
 	 */
 	public File getDirectory() {
-		final String METHOD_NAME = "getDirectory";
-		LOGGER.entering(CLASS_NAME, METHOD_NAME);
-
-		LOGGER.exiting(CLASS_NAME, METHOD_NAME, directory);
 		return directory;
 	}
 
@@ -383,12 +379,13 @@ public class PrioritManager {
 	 * @see #ITEM_FILE_ENDING
 	 */
 	private File getFileToItem(Item item) {
-		return new File(directory.getPath() + File.separator + item.getuName() + ITEM_FILE_ENDING);
+		final String METHOD_NAME = "getFileToItem";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME, item);
+
+		File file = new File(directory.getPath() + File.separator + item.getuName() + ITEM_FILE_ENDING);
+
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME, file);
+		return file;
 	}
 
-	public static void iLog() {
-		ConsoleHandler consoleHandler = new ConsoleHandler();
-		consoleHandler.setLevel(Level.ALL);
-		LOGGER.addHandler(consoleHandler);
-	}
 }
