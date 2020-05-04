@@ -1,5 +1,8 @@
 package voruti.priorit;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -220,15 +223,43 @@ public class Item implements Comparable<Item> {
 		} else if (!this.done && i.done) {
 			compareResult = -1;
 		} else {
-			int dateCompare = this.etaDate.compareTo(i.etaDate);
-			if (dateCompare != 0)
-				compareResult = dateCompare;
-			else
-				compareResult = this.uName.compareTo(i.uName);
+			int valueCompare = calculateValue(this) - calculateValue(i);
+			if (valueCompare != 0) {
+				compareResult = valueCompare;
+			} else {
+				int prioCompare = this.priority.getValue() - i.priority.getValue();
+				if (prioCompare != 0) {
+					compareResult = prioCompare;
+				} else {
+					compareResult = this.uName.compareTo(i.uName);
+				}
+			}
 		}
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME, compareResult);
 		return compareResult;
+	}
+
+	public static int calculateValue(Item item) {
+		final String METHOD_NAME = "calculateValue";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME, item);
+
+		int value = daysLeft(item.etaDate) * item.priority.getValue();
+
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME, value);
+		return value;
+	}
+
+	public static int daysLeft(Date date) {
+		final String METHOD_NAME = "daysLeft";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME, date);
+
+		int daysBetween = (int) ChronoUnit.DAYS.between(LocalDate.now(),date.toInstant()
+				.atZone(ZoneId.systemDefault())
+				.toLocalDate());
+
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME, daysBetween);
+		return daysBetween;
 	}
 
 	public static void iLog() {
