@@ -171,7 +171,7 @@ public class PrioritManager {
 	 *         found, the {@link List} is empty
 	 */
 	public List<Item> searchItem(String text) {
-		final String METHOD_NAME = "searchItem(String)";
+		final String METHOD_NAME = "searchItem";
 		LOGGER.entering(CLASS_NAME, METHOD_NAME, text);
 
 		List<Item> foundItems = getAllItems().stream()
@@ -186,8 +186,8 @@ public class PrioritManager {
 								.filter(c -> c.matches(text))
 								.collect(Collectors.toList())
 								.isEmpty())
-				.map(Item::copy)
 				.collect(Collectors.toList());
+		LOGGER.log(Level.FINE, "Searching for text={0} found foundItems={1}", new Object[] { text, foundItems });
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME, foundItems);
 		return foundItems;
