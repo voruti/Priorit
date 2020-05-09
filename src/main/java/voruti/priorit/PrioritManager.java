@@ -296,7 +296,7 @@ public class PrioritManager {
 
 		final List<Item> items = new ArrayList<>();
 
-		successful = Files.walk(directory.toPath(), 0)
+		successful = Files.walk(directory.toPath(), 1)
 				.filter(p -> p.toString()
 						.endsWith(ITEM_FILE_ENDING))
 				.filter(path -> { // contains only failed paths afterwards
