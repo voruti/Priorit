@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.junit.jupiter.api.Test;
@@ -134,8 +135,7 @@ class ItemTest {
 	}
 
 	/**
-	 * Test method for
-	 * {@link voruti.priorit.Item#calculateValue(voruti.priorit.Item)}.
+	 * Test method for {@link voruti.priorit.Item#calculateValue()}.
 	 */
 	@Test
 	void testCalculateValue() {
@@ -149,10 +149,10 @@ class ItemTest {
 		i4.setPriority(Priority.LOW);
 		i4.setEtaDate(plusSeventeen);
 
-		int v1 = Item.calculateValue(i1);
-		int v2 = Item.calculateValue(i2);
-		int v3 = Item.calculateValue(i3);
-		int v4 = Item.calculateValue(i4);
+		int v1 = i1.calculateValue();
+		int v2 = i2.calculateValue();
+		int v3 = i3.calculateValue();
+		int v4 = i4.calculateValue();
 
 		assertEquals(150, v1);
 		assertEquals(60, v2);
@@ -175,4 +175,19 @@ class ItemTest {
 		assertEquals(17, days2);
 	}
 
+	/**
+	 * Test method for {@link voruti.priorit.Item#isValid()}.
+	 */
+	@Test
+	void testIsValid() {
+		Item i1 = new Item();
+		Item i2 = new Item();
+		i2.setCategories(new ArrayList<>());
+
+		boolean b1 = i1.isValid();
+		boolean b2 = i2.isValid();
+
+		assertTrue(b1);
+		assertFalse(b2);
+	}
 }
