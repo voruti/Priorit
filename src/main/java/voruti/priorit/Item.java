@@ -232,7 +232,7 @@ public class Item implements Comparable<Item> {
 		} else if (!this.done && i.done) {
 			compareResult = -1;
 		} else {
-			int valueCompare = calculateValue(this) - calculateValue(i);
+			int valueCompare = calculateValue() - i.calculateValue();
 			if (valueCompare != 0) {
 				compareResult = valueCompare;
 			} else {
@@ -250,19 +250,34 @@ public class Item implements Comparable<Item> {
 	}
 
 	/**
-	 * Calculates the "value"/"worth" of {@link Item item}.
+	 * Calculates the "value"/"worth" of @ {@code this} {@link Item}.
 	 * 
-	 * @param item the {@link Item} to calculate the value for
 	 * @return the value
 	 */
-	public static int calculateValue(Item item) {
+	public int calculateValue() {
 		final String METHOD_NAME = "calculateValue";
-		LOGGER.entering(CLASS_NAME, METHOD_NAME, item);
+		LOGGER.entering(CLASS_NAME, METHOD_NAME);
 
-		int value = daysLeft(item.etaDate) * item.priority.getValue();
+		int value = daysLeft(etaDate) * priority.getValue();
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME, value);
 		return value;
+	}
+
+	/**
+	 * Checks if {@code this} {@link Item} is valid.
+	 * 
+	 * @return {@code true}, if the {@link Item} is valid
+	 */
+	public boolean isValid() {
+		final String METHOD_NAME = "isValid";
+		LOGGER.entering(CLASS_NAME, METHOD_NAME);
+
+		boolean isValid = (title != null && text != null && categories != null && !categories.isEmpty()
+				&& etaDate != null && uName != null && priority != null);
+
+		LOGGER.exiting(CLASS_NAME, METHOD_NAME, isValid);
+		return isValid;
 	}
 
 	/**

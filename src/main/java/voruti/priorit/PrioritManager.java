@@ -110,12 +110,16 @@ public class PrioritManager {
 
 		boolean successful = false;
 
-		if (ignoreAlreadyPresent || !getFileToItem(item).exists()) {
-			successful = saveToFile(item);
-			if (!successful)
-				LOGGER.log(Level.WARNING, "Error at saving item={0} to file", item);
+		if (item.isValid()) {
+			if (ignoreAlreadyPresent || !getFileToItem(item).exists()) {
+				successful = saveToFile(item);
+				if (!successful)
+					LOGGER.log(Level.WARNING, "Error at saving item={0} to file", item);
+			} else {
+				LOGGER.log(Level.WARNING, "item={0} is already in list", item);
+			}
 		} else {
-			LOGGER.log(Level.WARNING, "item={0} is already in list", item);
+			LOGGER.log(Level.WARNING, "item={0} is not valid", item);
 		}
 
 		LOGGER.exiting(CLASS_NAME, METHOD_NAME, successful);
