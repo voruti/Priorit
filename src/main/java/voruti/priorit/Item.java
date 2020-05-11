@@ -190,7 +190,8 @@ public class Item implements Comparable<Item> {
 
 	@Override
 	public String toString() {
-		return String.format("%s%s (%-.10s)", done ? "Done: " : "", title, uName);
+		return String.format("%s%s [in %s](%s)", done ? "Done: " : "", title, daysLeft(etaDate),
+				uName.length() > 10 ? ".." + uName.substring(uName.length() - 10) : uName);
 	}
 
 	/**
